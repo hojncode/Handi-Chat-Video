@@ -8,7 +8,14 @@ html(lang="en")
         link(rel="stylesheet", href="https://unpkg.com/mvp.css")
     body 
         header 
-            h1 It works!
+            h1 My Handi Chat
         main
-            h2 Welcome to Zoom - clone
+            form#nickname
+                input(type="text", placeholder="Nickname" required)
+                button Save
+            ul
+            form#message
+                input(type="text", placeholder="Write here" required)
+                button Send
+            
         script(src="/public/js/app.js")
