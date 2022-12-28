@@ -26,7 +26,9 @@ wsServer.on("connection", (socket) => {
   });
   socket.on("enter_room", (roomName, done) => {
     socket.join(roomName);
-    done();
+    done(); //프론트(app.js)의 showRoom()을 실행시킴.
+    //"welcome"event를 roomName에 있는 모든 사람에게 emit 한다.
+    socket.to(roomName).emit("welcome");
   });
 });
 
