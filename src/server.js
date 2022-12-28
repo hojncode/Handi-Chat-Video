@@ -30,6 +30,15 @@ wsServer.on("connection", (socket) => {
     //"welcome"event를 roomName에 있는 모든 사람에게 emit 한다.
     socket.to(roomName).emit("welcome");
   });
+  //disconnecting
+  socket.on("disconnecting", () => {
+    console.log(socket.rooms); // Set { ... }
+    socket.rooms.forEach((room) => socket.to(room).emit("bye"));
+  });
+  socket.on("new_message", (msg, room, done) => {
+    socket.to(room).emit("new_message", msg);
+    done(); // !done은 백엔드에서 실행되는게 아니다!! 프론트에서 실행된다.
+  });
 });
 
 httpServer.listen(3000, handleListen);
