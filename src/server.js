@@ -1,6 +1,7 @@
 import http from "http";
-import WebSocket from "ws";
+// import WebSocket from "ws";
 import express from "express";
+import { Server } from "socket.io";
 
 //setup-------------------------------------------------------------------------------------//
 const app = express();
@@ -15,10 +16,13 @@ app.get("*", (req, res) => res.redirect("/"));
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const httpServer = http.createServer(app);
+// const wss = new WebSocket.Server({ server });
+const wsServer = new Server(httpServer);
 
-const sockets = []; // 빈 배열에 메세지 입력값들을 넣는다.
+wsServer.on("connection", (socket) => {
+  console.log(socket);
+});
 
 // functions------------------------------------------------------------------------------------
 function onSocketClose() {
@@ -46,28 +50,31 @@ function onSocketClose() {
 
 //------------------------------------------------------------------------------------functions//
 
-wss.on("connection", (socket) => {
-  sockets.push(socket); // sockets 배열에 메세지 입력값들을 넣는다.
-  socket["NickName"] = "익명의 채팅자";
-  console.log("(socket.js)Conneted to Browser 🔄");
-  socket.on("close", onSocketClose);
-  //message
-  socket.on("message", (msg) => {
-    const msgUtf8 = msg.toString("utf-8");
-    const message = JSON.parse(msgUtf8);
-    // console.log("(socket.js)", parsed);
-    switch (message.type) {
-      case "Message":
-        sockets.forEach((aSocket) =>
-          aSocket.send(`${socket.NickName}:${message.payload}`)
-        );
-        break; //! switch 문에서는 case 사이에 break로 끊어줘야 코드가 새로 실행 되지 않는다.
-      case "NickName":
-        socket["NickName"] = message.payload;
-    }
-  });
-  socket.send("(socket.js/socket.send) connecting");
-  console.log(sockets);
-});
+// wss.on ---------------------------------------------------------------------------------
+// const sockets = []; // 빈 배열에 메세지 입력값들을 넣는다.
+// wss.on("connection", (socket) => {
+//   sockets.push(socket); // sockets 배열에 메세지 입력값들을 넣는다.
+//   socket["NickName"] = "익명의 채팅자";
+//   console.log("(socket.js)Conneted to Browser 🔄");
+//   socket.on("close", onSocketClose);
+//   //message
+//   socket.on("message", (msg) => {
+//     const msgUtf8 = msg.toString("utf-8");
+//     const message = JSON.parse(msgUtf8);
+//     // console.log("(socket.js)", parsed);
+//     switch (message.type) {
+//       case "Message":
+//         sockets.forEach((aSocket) =>
+//           aSocket.send(`${socket.NickName}:${message.payload}`)
+//         );
+//         break; //! switch 문에서는 case 사이에 break로 끊어줘야 코드가 새로 실행 되지 않는다.
+//       case "NickName":
+//         socket["NickName"] = message.payload;
+//     }
+//   });
+//   socket.send("(socket.js/socket.send) connecting");
+//   console.log(sockets);
+// });
+//--------------------------------------------------------------------wss.on
 
-server.listen(3000, handleListen);
+httpServer.listen(3000, handleListen);
