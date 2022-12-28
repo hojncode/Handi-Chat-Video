@@ -1,5 +1,20 @@
 const socket = io();
 
+const welcome = document.getElementById("welcome");
+const form = document.querySelector("form");
+
+function handleRoomSubmit(event) {
+  event.preventDefault();
+  const input = form.querySelector("input");
+  //socket.emit 에는 3개의 arguments 가 들어 갈 수 있다. 1)이름, 2) 보내고 싶은 payload (js object 가능) ,3) 함수
+  socket.emit("enter_room", { payload: input.value }, () => {
+    console.log("server is done!");
+  });
+  input.value = "";
+}
+
+form.addEventListener("submit", handleRoomSubmit);
+
 //! Legacy : webSocket
 // const socket = new WebSocket(`ws://${window.location.host}`);
 // const messageList = document.querySelector("ul");
