@@ -21,8 +21,15 @@ const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
 
 wsServer.on("connection", (socket) => {
-  console.log(socket);
+  socket.on("enter_room", (msg, done) => {
+    console.log(msg);
+    setTimeout(() => {
+      done();
+    }, 2000);
+  });
 });
+
+httpServer.listen(3000, handleListen);
 
 // functions------------------------------------------------------------------------------------
 function onSocketClose() {
@@ -76,5 +83,3 @@ function onSocketClose() {
 //   console.log(sockets);
 // });
 //--------------------------------------------------------------------wss.on
-
-httpServer.listen(3000, handleListen);
