@@ -6,7 +6,15 @@ const room = document.getElementById("room");
 
 room.hidden = true;
 
-let roomName;
+let roomName; //전역 변수 선언.
+//form 의 addEventListener실행 -> handleRoomSubmit() 실행 -> emit ->  roomName = input.value; ->  BACKEND: showRoom함수 실행 -> app.js 실행
+
+function addMessage(message) {
+  const ul = room.querySelector("ul");
+  const li = document.createElement("li");
+  li.innerText = message;
+  ul.appendChild(li);
+}
 
 function showRoom() {
   welcome.hidden = true;
@@ -26,6 +34,10 @@ function handleRoomSubmit(event) {
 
 form.addEventListener("submit", handleRoomSubmit);
 
+//백엔드의 "welcome"을 받아옴.
+socket.on("welcome", () => {
+  addMessage("Someone Joined.");
+});
 //! Legacy : webSocket
 // const socket = new WebSocket(`ws://${window.location.host}`);
 // const messageList = document.querySelector("ul");
