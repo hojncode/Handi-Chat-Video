@@ -3,13 +3,15 @@ const socket = io();
 const welcome = document.getElementById("welcome");
 const form = document.querySelector("form");
 
+function backendDone(msg) {
+  console.log(`(app.js)`, msg);
+}
+
 function handleRoomSubmit(event) {
   event.preventDefault();
   const input = form.querySelector("input");
-  //socket.emit 에는 3개의 arguments 가 들어 갈 수 있다. 1)이름, 2) 보내고 싶은 payload (js object 가능) ,3) 함수
-  socket.emit("enter_room", { payload: input.value }, () => {
-    console.log("server is done!");
-  });
+  //socket.emit 에는 원하는만큼의 arguments 가 들어 갈 수 있다. 1)이름, 2) 보내고 싶은 payload (js object 가능) ,3) 서버에서 호출하는 함수 * 마지막 argument는 함수가 들어가야한다-규칙.
+  socket.emit("enter_room", input.value, backendDone);
   input.value = "";
 }
 
