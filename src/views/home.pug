@@ -6,18 +6,23 @@ html(lang="en")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title Zoom - clone
         link(rel="stylesheet", href="https://unpkg.com/mvp.css")
-    body 
+    body
         header 
             h1 My Handi Chat
         main
             div#welcome
                 form
-                    input(type="text", placeholder="room name", required)
+                    input#roomName(type="text", placeholder="room name", )
+                    input#nickName(type="text" placeholder="nickname", )
                     button Enter Room
             div#room
                 h3
                 ul
-                form
-                    input(type="text" placeholder="message", required)
+                form#msg
+                    input(type="text" placeholder="message", )
+                    button Send
+                form#changeName
+                    input(type="text" placeholder ="change name", )
+                    button change
         script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")
