@@ -76,11 +76,13 @@ wsServer.on("connection", (socket) => {
     socket.to(room).emit("new_message", `${socket.nickname}:${msg}`);
     done(); // !done은 백엔드에서 실행되는게 아니다!! 프론트에서 실행된다.
   });
-  // socket.on("nickname", (name) => {
-  //   console.log(name);
-  //   socket.push(name);
-  //   // socket.to(name).emit("nicks", )
-  // });
+
+  //change nickname
+  socket.on("changeNickName", (name) => {
+    socket["nickname"] = name;
+    console.log(name);
+    socket.to(name).emit("welcome", socket.nickname);
+  });
 });
 
 httpServer.listen(3000, handleListen);
