@@ -52,9 +52,18 @@ function handleRoomSubmit(event) {
   socket.emit("enter_room", roomNameInput.value, nickNameInput.value, showRoom);
   roomName = roomNameInput.value;
   roomNameInput.value = "";
+  const changeNameInput = room.querySelector("#changeName input");
+  changeNameInput.value = nickNameInput.value;
+}
+
+function handleChangeNickName(event) {
+  event.preventDefault();
+  const changeNameInput = room.querySelector("#changeName input");
+  changeNameInput.value = nickNameInput.value;
 }
 
 enterForm.addEventListener("submit", handleRoomSubmit);
+// room.addEventListener("submit", handleChangeNickName);
 
 //백엔드의 "welcome"을 받아옴.
 socket.on("welcome", (user) => {
@@ -66,6 +75,19 @@ socket.on("bye", (left) => {
 });
 
 socket.on("new_message", addMessage);
+
+socket.on("room_change", (rooms) => {
+  const roomList = welcome.querySelector("ul");
+  roomList.innerHTML = "";
+  if (rooms.length === 0) {
+    return;
+  }
+  rooms.forEach((room) => {
+    const li = document.createElement("li");
+    li.innerText = room;
+    roomList.append(li);
+  });
+}); // === msg => console.log(msg)
 
 //! Legacy : webSocket
 // const socket = new WebSocket(`ws://${window.location.host}`);

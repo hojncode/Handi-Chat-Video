@@ -23,7 +23,7 @@ const wsServer = new Server(httpServer);
 function publicRooms() {
   //구조분해할당으로 표현하기===
   const {
-    socket: {
+    sockets: {
       adapter: { sids, rooms },
     },
   } = wsServer;
@@ -43,18 +43,22 @@ function publicRooms() {
 
 wsServer.on("connection", (socket) => {
   socket["nickname"] = "ANON";
+
   socket.onAny((event) => {
     console.log(`Socket Event: ${event}`);
   });
+
   socket.on("enter_room", (roomName, nickName, done) => {
     socket["nickname"] = nickName;
     socket.join(roomName);
     done(); //프론트(app.js)의 showRoom()을 실행시킴.
     //"welcome"event를 roomName에 있는 모든 사람에게 emit 한다.
-    socket.to(roomName).emit("welcome", socket.nickname);
+    socket.to(roomName).emit("welcome", socket.nickname); // -> roomName에만 메세지를 보냄.
     // console.log(socket.nickname);
     // nicks.push(socket.nickname);
+    wsServer.sockets.emit("room_change", publicRooms()); // 모든 sockets에 보냄.
   });
+
   //disconnecting
   socket.on("disconnecting", () => {
     console.log(socket.rooms); // Set { ... }
@@ -62,6 +66,12 @@ wsServer.on("connection", (socket) => {
       socket.to(room).emit("bye", socket.nickname)
     );
   });
+
+  //disconnect
+  socket.on("disconnect", () => {
+    wsServer.sockets.emit("room_change", publicRooms());
+  });
+
   socket.on("new_message", (msg, room, done) => {
     socket.to(room).emit("new_message", `${socket.nickname}:${msg}`);
     done(); // !done은 백엔드에서 실행되는게 아니다!! 프론트에서 실행된다.
