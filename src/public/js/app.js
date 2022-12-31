@@ -52,18 +52,18 @@ function handleRoomSubmit(event) {
   socket.emit("enter_room", roomNameInput.value, nickNameInput.value, showRoom);
   roomName = roomNameInput.value;
   roomNameInput.value = "";
-  const changeNameInput = room.querySelector("#changeName input");
-  changeNameInput.value = nickNameInput.value;
+  //   const changeNameInput = room.querySelector("#changeName input");
+  //   changeNameInput.value = nickNameInput.value;
 }
 
 function handleChangeNickName(event) {
   event.preventDefault();
   const changeNameInput = room.querySelector("#changeName input");
-  changeNameInput.value = nickNameInput.value;
+  socket.emit("changeNickName", changeNameInput.value);
 }
 
 enterForm.addEventListener("submit", handleRoomSubmit);
-// room.addEventListener("submit", handleChangeNickName);
+room.addEventListener("submit", handleChangeNickName);
 
 //백엔드의 "welcome"을 받아옴.
 socket.on("welcome", (user) => {
