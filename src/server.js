@@ -3,7 +3,7 @@ import http from "http";
 import express from "express";
 import { Server } from "socket.io";
 
-//setup-------------------------------------------------------------------------------------//
+//setup ======================================================= //
 const app = express();
 
 app.set("view engine", "pug");
@@ -12,7 +12,7 @@ app.use("/public", express.static(__dirname + "/public"));
 app.get("/", (req, res) => res.render("home"));
 //어떠한 url입력해도 /로 보냄.
 app.get("*", (req, res) => res.redirect("/"));
-//-------------------------------------------------------------------------------------setup//
+// ======================================================= setup//
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
@@ -20,6 +20,13 @@ const httpServer = http.createServer(app);
 // const wss = new WebSocket.Server({ server });
 const wsServer = new Server(httpServer);
 
+//functions ====================================================
+//countRoom()
+function countRoom(roomName) {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+}
+
+//publicRooms()
 function publicRooms() {
   //구조분해할당으로 표현하기===
   const {
@@ -41,37 +48,44 @@ function publicRooms() {
   return publicRooms;
 }
 
+// ==================================================== functions //
+
+//wsServer ====================================================
 wsServer.on("connection", (socket) => {
+  //default nickname
   socket["nickname"] = "ANON";
 
+  // socket.onAny
   socket.onAny((event) => {
     console.log(`Socket Event: ${event}`);
   });
 
+  // enter_room
   socket.on("enter_room", (roomName, nickName, done) => {
+    console.log(roomName);
     socket["nickname"] = nickName;
     socket.join(roomName);
     done(); //프론트(app.js)의 showRoom()을 실행시킴.
     //"welcome"event를 roomName에 있는 모든 사람에게 emit 한다.
-    socket.to(roomName).emit("welcome", socket.nickname); // -> roomName에만 메세지를 보냄.
-    // console.log(socket.nickname);
+    socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName)); // -> roomName에만 메세지를 보냄.
     // nicks.push(socket.nickname);
     wsServer.sockets.emit("room_change", publicRooms()); // 모든 sockets에 보냄.
   });
+  // ====================================================wsServer
 
   //disconnecting
   socket.on("disconnecting", () => {
     console.log(socket.rooms); // Set { ... }
     socket.rooms.forEach((room) =>
-      socket.to(room).emit("bye", socket.nickname)
+      socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)
     );
   });
 
-  //disconnect
+  // disconnect
   socket.on("disconnect", () => {
     wsServer.sockets.emit("room_change", publicRooms());
   });
-
+  // new_message
   socket.on("new_message", (msg, room, done) => {
     socket.to(room).emit("new_message", `${socket.nickname}:${msg}`);
     done(); // !done은 백엔드에서 실행되는게 아니다!! 프론트에서 실행된다.
@@ -85,12 +99,13 @@ wsServer.on("connection", (socket) => {
   });
 });
 
+//httpServer.listen
 httpServer.listen(3000, handleListen);
 
 // functions------------------------------------------------------------------------------------
-function onSocketClose() {
-  console.log("(socket.js)Disconnected from the Browser 📵");
-}
+// function onSocketClose() {
+//   console.log("(socket.js)Disconnected from the Browser 📵");
+// }
 
 //FIXME: //!여기서 함수를 선언하면 , 아래 wss에서 parameter로 들어온 socket이 적용되지 않기에 아래 wss에서 함수를 작성한다.
 // function onSocketMessage(msg) {

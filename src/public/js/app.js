@@ -66,11 +66,16 @@ enterForm.addEventListener("submit", handleRoomSubmit);
 room.addEventListener("submit", handleChangeNickName);
 
 //백엔드의 "welcome"을 받아옴.
-socket.on("welcome", (user) => {
+socket.on("welcome", (user, newCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (${newCount})`;
   addMessage(`${user} arrived!`);
+  console.log(newCount);
 });
 
-socket.on("bye", (left) => {
+socket.on("bye", (left, newCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (${newCount})`;
   addMessage(`${left} left.`);
 });
 
