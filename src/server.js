@@ -1,7 +1,8 @@
 import http from "http";
 // import WebSocket from "ws";
 import express from "express";
-import { Server } from "socket.io";
+const { Server } = require("socket.io");
+const { instrument } = require("@socket.io/admin-ui");
 
 //setup ======================================================= //
 const app = express();
@@ -18,7 +19,16 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
 const httpServer = http.createServer(app);
 // const wss = new WebSocket.Server({ server });
-const wsServer = new Server(httpServer);
+const wsServer = new Server(httpServer, {
+  cors: {
+    origin: ["https://admin.socket.io"],
+    credentials: true,
+  },
+});
+instrument(wsServer, {
+  auth: false,
+  mode: "development",
+});
 
 //functions ====================================================
 //countRoom()
