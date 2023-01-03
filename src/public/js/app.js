@@ -96,7 +96,7 @@ muteBtn.addEventListener("click", handleMuteClick);
 cameraBtn.addEventListener("click", handleCameraClick);
 camerasSelect.addEventListener("input", handleCameraChange);
 
-////  Welcome Form (join a room)
+// Welcome Form (join a room)
 const welcome = document.getElementById("welcome");
 const welcomeForm = welcome.querySelector("form");
 
@@ -117,8 +117,9 @@ async function handleWelcomeSubmit(event) {
 }
 
 welcomeForm.addEventListener("submit", handleWelcomeSubmit);
-const showRoomName = document.getElementById("showRoomName");
+const showRoomName = document.getElementById("showRoomName"); // 내가 만들것 - 방이름
 
+// Socket Code
 socket.on("welcome", async () => {
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
@@ -127,23 +128,43 @@ socket.on("welcome", async () => {
 });
 
 socket.on("offer", async (offer) => {
+  console.log("received the offer");
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
   console.log(answer);
   myPeerConnection.setLocalDescription(answer);
   socket.emit("answer", answer, roomName);
+  console.log("sent the offer");
 });
 
 socket.on("answer", (answer) => {
+  console.log("received the answer");
   myPeerConnection.setRemoteDescription(answer);
+});
+
+socket.on("ice", (ice) => {
+  console.log("received candidate");
+  myPeerConnection.addIceCandidate(ice);
 });
 
 // RTC Code
 // 1. myPeerConnection 을 서로 다른 브라우저에 만든다.
-// 2. addStream 을 사용 -> 하지만 addStream 은 낡은 함수라 다른 것으로 대체한다.
+// 2. addStream 을 사용 -> 하지만 addStream 은 낡은 함수라 다른 것으로 대체한다. -> "track" 사용 mdn 문서 참고.
 function makeConnection() {
   myPeerConnection = new RTCPeerConnection();
+  myPeerConnection.addEventListener("icecandidate", handleIce);
+  myPeerConnection.addEventListener("track", handleAddStream);
   myStream
     .getTracks()
     .forEach((track) => myPeerConnection.addTrack(track, myStream));
+}
+
+function handleIce(data) {
+  console.log("sent candidate");
+  socket.emit("ice", data.candidate, roomName);
+}
+
+function handleAddStream(data) {
+  const peerFace = document.getElementById("peerFace");
+  peerFace.srcObject = data.streams[0];
 }
