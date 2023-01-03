@@ -89,7 +89,15 @@ function handleCameraClick() {
 }
 
 async function handleCameraChange() {
+  // 본인 카메라 종류 선택하기
   await getMedia(camerasSelect.value);
+  if (myPeerConnection) {
+    const videoTrack = myStream.getVideoTracks()[0]; // 나 자신을 위한 myStream
+    const videoSender = myPeerConnection
+      .getSenders() // sender : peer 로 보내진 media stream track 을 컨트롤하게 해준다.
+      .find((sender) => sender.track.kind === "video");
+    videoSender.replaceTrack(videoTrack);
+  }
 }
 // ============================================= function //
 muteBtn.addEventListener("click", handleMuteClick);
