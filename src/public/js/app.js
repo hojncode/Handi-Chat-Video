@@ -159,7 +159,19 @@ socket.on("ice", (ice) => {
 // 1. myPeerConnection 을 서로 다른 브라우저에 만든다.
 // 2. addStream 을 사용 -> 하지만 addStream 은 낡은 함수라 다른 것으로 대체한다. -> "track" 사용 mdn 문서 참고.
 function makeConnection() {
-  myPeerConnection = new RTCPeerConnection();
+  myPeerConnection = new RTCPeerConnection({
+    iceServers: [
+      {
+        urls: [
+          "stun:stun.l.google.com:19302",
+          "stun:stun1.l.google.com:19302",
+          "stun:stun2.l.google.com:19302",
+          "stun:stun3.l.google.com:19302",
+          "stun:stun4.l.google.com:19302",
+        ],
+      },
+    ],
+  });
   myPeerConnection.addEventListener("icecandidate", handleIce);
   myPeerConnection.addEventListener("track", handleAddStream);
   myStream
